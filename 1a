@@ -1,0 +1,107 @@
+class Produk:
+    """Class untuk merepresentasikan entitas Produk."""
+    def __init__(self, id_produk: str, nama_produk: str, harga: float, stok: int):
+        self.id_produk = id_produk
+        self.nama_produk = nama_produk
+        self.harga = harga
+        self.stok = stok
+
+    def __str__(self):
+        return f"ID: {self.id_produk} | Nama: {self.nama_produk} | Harga: Rp{self.harga:,.0f} | Stok: {self.stok}"
+
+
+class InventarisADT:
+    """Implementasi Abstract Data Type (ADT) Inventaris menggunakan Hash Table (dict)."""
+    def __init__(self):
+
+        self._data_inventaris = {}
+
+    def tambah_produk(self, id_produk: str, nama: str, harga: float, stok: int) -> bool:
+        """Operasi Penyisipan (Insert) - O(1)"""
+        if id_produk in self._data_inventaris:
+            return False  
+        
+        produk_baru = Produk(id_produk, nama, harga, stok)
+        self._data_inventaris[id_produk] = produk_baru
+        return True
+
+    def cari_produk(self, id_produk: str) -> Produk | None:
+        """Operasi Pencarian (Search by ID) - O(1)"""
+        return self._data_inventaris.get(id_produk, None)
+
+    def hapus_produk(self, id_produk: str) -> bool:
+        """Operasi Penghapusan (Delete by ID) - O(1)"""
+        if id_produk in self._data_inventaris:
+            del self._data_inventaris[id_produk]
+            return True
+        return False
+
+    def tampilkan_semua(self):
+        """Menampilkan seluruh produk dalam inventaris."""
+        if not self._data_inventaris:
+            print("\n[!] Inventaris masih kosong.")
+            return
+        
+        print("\n=== DAFTAR INVENTARIS PRODUK ===")
+        for produk in self._data_inventaris.values():
+            print(f"- {produk}")
+
+
+def main_cli_inventaris():
+    inventaris = InventarisADT()
+    
+    
+    inventaris.tambah_produk("PRD001", "Laptop ASUS ROG", 18500000, 10)
+    inventaris.tambah_produk("PRD002", "Mouse Wireless Logi", 250000, 50)
+
+    while True:
+        print("\n==================================")
+        print(" SISTEM MANAJEMEN INVENTARIS (ADT)")
+        print("==================================")
+        print("1. Mendaftarkan Produk Baru (Insert)")
+        print("2. Cari Detail Produk by ID (Search)")
+        print("3. Hapus Produk (Delete)")
+        print("4. Tampilkan Semua Produk")
+        print("5. Keluar")
+        pilihan = input("Pilih menu (1-5): ").strip()
+
+        if pilihan == '1':
+            id_p = input("Masukkan ID Produk: ").strip()
+            nama = input("Masukkan Nama Produk: ").strip()
+            try:
+                harga = float(input("Masukkan Harga: "))
+                stok = int(input("Masukkan Stok: "))
+                if inventaris.tambah_produk(id_p, nama, harga, stok):
+                    print("[✓] Produk berhasil didaftarkan!")
+                else:
+                    print("[!] Gagal: ID Produk sudah terdaftar.")
+            except ValueError:
+                print("[!] Input harga/stok harus berupa angka.")
+
+        elif pilihan == '2':
+            id_p = input("Masukkan ID Produk yang dicari: ").strip()
+            hasil = inventaris.cari_produk(id_p)
+            if hasil:
+                print(f"\n[✓] Produk Ditemukan:\n{hasil}")
+            else:
+                print("[!] Produk tidak ditemukan.")
+
+        elif pilihan == '3':
+            id_p = input("Masukkan ID Produk yang akan dihapus: ").strip()
+            if inventaris.hapus_produk(id_p):
+                print("[✓] Produk berhasil dihapus dari sistem.")
+            else:
+                print("[!] Gagal: ID Produk tidak ditemukan.")
+
+        elif pilihan == '4':
+            inventaris.tampilkan_semua()
+
+        elif pilihan == '5':
+            print("Terima kasih telah menggunakan sistem.")
+            break
+        else:
+            print("[!] Pilihan tidak valid.")
+
+
+if __name__ == "__main__":
+    main_cli_inventaris()
