@@ -1,0 +1,127 @@
+class NodeOrganisasi:
+    """Class untuk merepresentasikan entitas Pegawai/Jabatan dalam Tree."""
+    def __init__(self, id_pegawai: str, nama: str, jabatan: str):
+        self.id_pegawai = id_pegawai
+        self.nama = nama
+        self.jabatan = jabatan
+        self.children = [] 
+
+    def tambah_bawahan(self, child_node):
+        self.children.append(child_node)
+
+    def __str__(self):
+        return f"[{self.jabatan}] {self.nama} (ID: {self.id_pegawai})"
+
+
+class SilsilahOrganisasiTree:
+    """Class untuk mengelola hirarki organisasi berbasis General Tree."""
+    def __init__(self, root_node: NodeOrganisasi):
+        self.root = root_node
+
+    def insert_node(self, nama_atasan: str, id_pegawai: str, nama: str, jabatan: str) -> bool:
+        """a. insert_node(): Menyisipkan pegawai baru di bawah atasan tertentu."""
+        parent_node = self.search_node(nama_atasan)
+        if parent_node:
+            node_baru = NodeOrganisasi(id_pegawai, nama, jabatan)
+            parent_node.tambah_bawahan(node_baru)
+            return True
+        return False
+
+    def search_node(self, keyword: str, current_node: NodeOrganisasi = None) -> NodeOrganisasi | None:
+        """b. search_node(): Mencari data pegawai berdasarkan nama atau jabatan (DFS)."""
+        if current_node is None:
+            current_node = self.root
+
+        
+        if (keyword.lower() in current_node.nama.lower()) or (keyword.lower() in current_node.jabatan.lower()):
+            return current_node
+
+        
+        for child in current_node.children:
+            hasil = self.search_node(keyword, child)
+            if hasil:
+                return hasil
+        return None
+
+    # --- 3 ALGORITMA TRAVERSAL ---
+
+    def preorder_traversal(self, node: NodeOrganisasi = None, level: int = 0):
+        """Preorder: Root -> Children (Kiri ke Kanan)"""
+        if node is None:
+            node = self.root
+
+        indent = "  " * level
+        print(f"{indent}- {node}")
+
+        for child in node.children:
+            self.preorder_traversal(child, level + 1)
+
+    def inorder_traversal(self, node: NodeOrganisasi = None, level: int = 0):
+        """Inorder General Tree: Child Pertama -> Root -> Sisa Children"""
+        if node is None:
+            node = self.root
+
+   
+        if len(node.children) > 0:
+            self.inorder_traversal(node.children[0], level + 1)
+
+       
+        indent = "  " * level
+        print(f"{indent}- {node}")
+
+    
+        for child in node.children[1:]:
+            self.inorder_traversal(child, level + 1)
+
+    def postorder_traversal(self, node: NodeOrganisasi = None, level: int = 0):
+        """Postorder: Children (Kiri ke Kanan) -> Root"""
+        if node is None:
+            node = self.root
+
+        for child in node.children:
+            self.postorder_traversal(child, level + 1)
+
+        indent = "  " * level
+        print(f"{indent}- {node}")
+
+
+
+if __name__ == "__main__":
+    print("==================================================")
+    print(" DEMO SILSILAH ORGANISASI UIN SUSKA RIAU (TREE)")
+    print("==================================================")
+
+    # 1. Inisialisasi Root (Rektor)
+    rektor = NodeOrganisasi("EMP001", "Prof. Dr. Khairunnas Rajab", "Rektor")
+    organisasi = SilsilahOrganisasiTree(rektor)
+
+    # 2. Sisipkan Dekan di bawah Rektor
+    organisasi.insert_node("Rektor", "EMP002", "Dr. H. Mas'ud Zein", "Dekan FST")
+    organisasi.insert_node("Rektor", "EMP003", "Dr. H. Kusnadi", "Dekan FTK")
+
+    # 3. Sisipkan Ketua Prodi di bawah Dekan FST
+    organisasi.insert_node("Dekan FST", "EMP004", "Dr. Fitra Oliver", "Ketua Prodi T. Informatika")
+    organisasi.insert_node("Dekan FST", "EMP005", "Dr. Elin Haerani", "Ketua Prodi S. Informasi")
+
+    # 4. Sisipkan Dosen/Staf di bawah Ketua Prodi T. Informatika
+    organisasi.insert_node("Ketua Prodi T. Informatika", "EMP006", "Rian Fikri, M.T.", "Dosen / Staf")
+    organisasi.insert_node("Ketua Prodi T. Informatika", "EMP007", "Novi Yanti, M.Kom.", "Dosen / Staf")
+
+    # Uji Coba Pencarian
+    print("\n--- UJI PENCARIAN (search_node) ---")
+    query = "Ketua Prodi T. Informatika"
+    hasil_cari = organisasi.search_node(query)
+    if hasil_cari:
+        print(f"Hasil pencarian '{query}': Ditemukan -> {hasil_cari}")
+    else:
+        print(f"Hasil pencarian '{query}': Tidak Ditemukan.")
+
+    # Uji Coba Traversal
+    print("\n--- 1. PREORDER TRAVERSAL (Atasan -> Bawahan) ---")
+    organisasi.preorder_traversal()
+
+    print("\n--- 2. INORDER TRAVERSAL (Anak Pertama -> Atasan -> Anak Lain) ---")
+    organisasi.inorder_traversal()
+
+    print("\n--- 3. POSTORDER TRAVERSAL (Bawahan -> Atasan) ---")
+    organisasi.postorder_traversal()
